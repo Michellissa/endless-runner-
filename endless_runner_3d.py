@@ -1,5 +1,4 @@
 from ursina import *
-from ursina.prefabs.first_person_controller import FirstPersonController
 import random
 
 app = Ursina()
@@ -65,6 +64,7 @@ def create_obstacle():
         position=(x, height / 2, 60),
         collider="box",
     )
+    obs.hit = False
     obstacle_list.append(obs)
 
 
