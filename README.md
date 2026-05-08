@@ -1,6 +1,6 @@
 # Flappy Bird – byggt med Python 🐦
 
-Hej Alekh! 👋 Välkommen till ditt första Pygame-projekt! Den här README-filen guidar dig genom koden och förklarar allt på ett enkelt sätt. Du kommer att fatta det här – jag lovar!
+Tjena Alekh! 👋 Här är ditt pyhton spel,  Den här README-filen guidar dig genom koden och förklarar allt på ett enkelt sätt. Du kommer att fatta det här – de kan jag garantera brur
 
 ---
 
@@ -17,7 +17,7 @@ Hej Alekh! 👋 Välkommen till ditt första Pygame-projekt! Den här README-fil
 
 ## Vad är Pygame?
 
-Pygame är som en **verktygslåda för spel**. Precis som en snickare använder hammare och såg för att bygga ett hus, använder vi Pygame för att:
+Pygame är som en **verktygslåda för spel**:
 
 - **Rita figurer** på skärmen (fåglar, rör, bakgrund)
 - **Lyssna efter knapptryck** (t.ex. SPACE-tangenten)
@@ -178,6 +178,4 @@ Byt ut `flappy_bird.py` mot vad du nu har döpt filen till.
 
 ---
 
-Lycka till, Alekh! 🎉 Du fixar det här. Om något känns krångligt – läs en gång till, testa att ändra en siffra i koden, och se vad som händer. Det är så alla lär sig – genom att experimentera!
-
-**Du är grym som ger dig på det här!** 💪
+Varsågod Alekh, hoppas de här ger dig en skön betyg! 
