@@ -7,10 +7,11 @@ window.title = "Endless Runner 3D"
 window.borderless = False
 window.fullscreen = False
 window.size = (1000, 700)
-window.color = color.rgb(135, 206, 235)
 
-scene.fog_color = color.rgb(135, 206, 235)
-scene.fog_density = 0.005
+Sky(color=color.rgb(100, 150, 210))
+
+scene.fog_color = color.rgb(100, 150, 210)
+scene.fog_density = 0.008
 
 score = 0
 game_over = False
@@ -24,15 +25,17 @@ spawn_counter = 0
 player = Entity(
     model="cube",
     color=color.orange,
+    texture="white_cube",
     scale=(0.7, 1, 0.7),
     position=(0, 0.5, 0),
     collider="box",
 )
 player.y_velocity = 0
+player.tilt_target = 0
 
 ground = Entity(
     model="cube",
-    color=color.rgb(80, 180, 80),
+    color=color.rgb(60, 140, 60),
     scale=(20, 0.2, 200),
     position=(0, -0.1, 0),
     collider="box",
@@ -40,7 +43,8 @@ ground = Entity(
 
 road = Entity(
     model="cube",
-    color=color.rgb(100, 100, 100),
+    color=color.rgb(80, 80, 80),
+    texture="white_cube",
     scale=(7, 0.05, 200),
     position=(0, 0.01, 0),
 )
@@ -62,7 +66,7 @@ for x in lane_positions:
             position=(x, 0.12, z),
         )
 
-PointLight(position=(10, 20, -10), color=color.white)
+DirectionalLight(shadow_map_resolution=Vec2(2048, 2048))
 
 
 def create_obstacle():
@@ -75,6 +79,7 @@ def create_obstacle():
     obs = Entity(
         model="cube",
         color=color_choice,
+        texture="noise",
         scale=(0.7, height, 0.7),
         position=(x, height / 2, 80),
         collider="box",
@@ -94,6 +99,11 @@ def reset_game():
     player.position = (0, 0.5, 0)
     player.y_velocity = 0
     player.color = color.orange
+    player.tilt_target = 0
+    player.rotation_z = 0
+    go_panel.visible = False
+    go_text.visible = False
+    restart_text.visible = False
     for obs in obstacle_list:
         destroy(obs)
     obstacle_list.clear()
@@ -114,6 +124,8 @@ def update():
     dx = target_x - player.x
     player.x += dx * 12 * time.dt if abs(dx) > 0.05 else dx
 
+    player.rotation_z = lerp(player.rotation_z, player.tilt_target, 8 * time.dt)
+
     for obs in obstacle_list[:]:
         obs.z -= scroll_speed * time.dt
         if obs.z < -5:
@@ -127,6 +139,9 @@ def update():
             obs.hit = True
             game_over = True
             player.color = color.red
+            go_panel.visible = True
+            go_text.visible = True
+            restart_text.visible = True
 
     spawn_counter += 1
     if spawn_counter > max(15, 40 - score):
@@ -153,16 +168,58 @@ def input(key):
     if key == "a" or key == "left arrow":
         current_lane = max(0, current_lane - 1)
         target_x = lane_positions[current_lane]
+        player.tilt_target = 8
 
     if key == "d" or key == "right arrow":
         current_lane = min(2, current_lane + 1)
         target_x = lane_positions[current_lane]
+        player.tilt_target = -8
+
+    if (
+        key == "a up"
+        or key == "left arrow up"
+        or key == "d up"
+        or key == "right arrow up"
+    ):
+        player.tilt_target = 0
 
 
-score_text = Text(text="Score: 0", position=(-0.85, 0.45), scale=2, color=color.black)
-go_text = Text(text="", position=(0, 0.1), scale=3, color=color.red, origin=(0, 0))
-restart_text = Text(
-    text="", position=(0, -0.1), scale=1.5, color=color.black, origin=(0, 0)
+score_text = Text(
+    text="Score: 0",
+    position=(-0.85, 0.45),
+    scale=2,
+    color=color.black,
+    font="VeraMono.ttf",
 )
+
+go_panel = Entity(
+    parent=camera.ui,
+    model="quad",
+    color=color.rgba(0, 0, 0, 160),
+    scale=(0.55, 0.25),
+    position=(0, 0.05),
+    z=-1,
+)
+go_panel.visible = False
+
+go_text = Text(
+    text="",
+    position=(0, 0.12),
+    scale=3,
+    color=color.red,
+    origin=(0, 0),
+    font="VeraMono.ttf",
+)
+go_text.visible = False
+
+restart_text = Text(
+    text="",
+    position=(0, -0.04),
+    scale=1.5,
+    color=color.white,
+    origin=(0, 0),
+    font="VeraMono.ttf",
+)
+restart_text.visible = False
 
 app.run()
