@@ -7,61 +7,76 @@ window.title = "Endless Runner 3D"
 window.borderless = False
 window.fullscreen = False
 window.size = (1000, 700)
+window.color = color.rgb(135, 206, 235)
+
+scene.fog_color = color.rgb(135, 206, 235)
+scene.fog_density = 0.005
 
 score = 0
 game_over = False
-scroll_speed = 8
+scroll_speed = 10
 obstacle_list = []
-lane_positions = [-3, 0, 3]
+lane_positions = [-2.5, 0, 2.5]
 current_lane = 1
 target_x = 0
+spawn_counter = 0
 
 player = Entity(
     model="cube",
-    color=color.black,
-    scale=(0.8, 1.2, 0.8),
-    position=(0, 1, 0),
+    color=color.orange,
+    scale=(0.7, 1, 0.7),
+    position=(0, 0.5, 0),
     collider="box",
 )
 player.y_velocity = 0
 
-camera.position = (0, 6, -12)
-camera.rotation_x = 20
-
 ground = Entity(
     model="cube",
-    color=color.rgb(60, 40, 20),
-    scale=(30, 0.5, 100),
-    position=(0, -0.25, 50),
-    texture="white_cube",
+    color=color.rgb(80, 180, 80),
+    scale=(20, 0.2, 200),
+    position=(0, -0.1, 0),
     collider="box",
 )
 
 road = Entity(
     model="cube",
-    color=color.rgb(80, 80, 80),
-    scale=(10, 0.1, 100),
-    position=(0, 0.05, 50),
+    color=color.rgb(100, 100, 100),
+    scale=(7, 0.05, 200),
+    position=(0, 0.01, 0),
 )
 
-for i in range(2):
+for i in range(3):
     Entity(
         model="cube",
-        color=color.rgb(200, 200, 200),
-        scale=(0.15, 0.05, 50),
-        position=(-5 + i * 10, 0.1, 50),
+        color=color.white,
+        scale=(0.1, 0.03, 200),
+        position=(-2.5 + i * 2.5, 0.08, 0),
     )
+
+for x in lane_positions:
+    for z in range(0, 200, 4):
+        Entity(
+            model="cube",
+            color=color.white,
+            scale=(0.05, 0.01, 0.2),
+            position=(x, 0.12, z),
+        )
+
+PointLight(position=(10, 20, -10), color=color.white)
 
 
 def create_obstacle():
     lane = random.randint(0, 2)
     x = lane_positions[lane]
     height = random.choice([1.0, 1.5, 2.0])
+    color_choice = random.choice(
+        [color.rgb(200, 50, 50), color.rgb(50, 50, 200), color.rgb(200, 150, 0)]
+    )
     obs = Entity(
         model="cube",
-        color=color.rgb(34, 139, 34),
-        scale=(0.8, height, 0.8),
-        position=(x, height / 2, 60),
+        color=color_choice,
+        scale=(0.7, height, 0.7),
+        position=(x, height / 2, 80),
         collider="box",
     )
     obs.hit = False
@@ -69,38 +84,39 @@ def create_obstacle():
 
 
 def reset_game():
-    global score, game_over, scroll_speed, current_lane, target_x
+    global score, game_over, scroll_speed, current_lane, target_x, spawn_counter
     score = 0
     game_over = False
-    scroll_speed = 8
+    scroll_speed = 10
     current_lane = 1
     target_x = 0
-    player.position = (0, 1, 0)
+    spawn_counter = 0
+    player.position = (0, 0.5, 0)
     player.y_velocity = 0
-    player.color = color.black
+    player.color = color.orange
     for obs in obstacle_list:
         destroy(obs)
     obstacle_list.clear()
 
 
 def update():
-    global score, game_over, scroll_speed
+    global score, game_over, scroll_speed, spawn_counter
 
     if game_over:
         return
 
-    player.y_velocity -= 20 * time.dt
+    player.y_velocity -= 25 * time.dt
     player.y += player.y_velocity * time.dt
-    if player.y <= 1:
-        player.y = 1
+    if player.y <= 0.5:
+        player.y = 0.5
         player.y_velocity = 0
 
     dx = target_x - player.x
-    player.x += dx * 10 * time.dt if abs(dx) > 0.05 else dx
+    player.x += dx * 12 * time.dt if abs(dx) > 0.05 else dx
 
     for obs in obstacle_list[:]:
         obs.z -= scroll_speed * time.dt
-        if obs.z < -10:
+        if obs.z < -5:
             obstacle_list.remove(obs)
             destroy(obs)
             if not obs.hit:
@@ -112,10 +128,12 @@ def update():
             game_over = True
             player.color = color.red
 
-    if random.random() < 0.02:
+    spawn_counter += 1
+    if spawn_counter > max(15, 40 - score):
         create_obstacle()
+        spawn_counter = 0
 
-    scroll_speed = 8 + score * 0.1
+    scroll_speed = 10 + score * 0.15
 
     score_text.text = f"Score: {score}"
     if game_over:
@@ -129,8 +147,8 @@ def input(key):
     if key == "space":
         if game_over:
             reset_game()
-        elif player.y <= 1.01:
-            player.y_velocity = 8
+        elif player.y <= 0.51:
+            player.y_velocity = 10
 
     if key == "a" or key == "left arrow":
         current_lane = max(0, current_lane - 1)
